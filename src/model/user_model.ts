@@ -3,6 +3,8 @@ import jwt from 'jsonwebtoken';
 import { Document, Model, model, Schema } from 'mongoose';
 import validator from 'validator';
 
+import { TodoDocument } from './todo_model';
+
 const JWT_SECRET = process.env['JWT_SECRET']!;
 
 export interface User {
@@ -12,6 +14,7 @@ export interface User {
 
 export interface UserDocument extends User, Document {
     tokens: Array<string>;
+    todos: Array<TodoDocument> | undefined;
     generateAuthToken(): Promise<string>;
     removeAuthToken(token: string): Promise<void>;
     removeAllAuthTokens(): Promise<void>;
@@ -54,6 +57,12 @@ const UserSchema = new Schema<UserDocument, UserModel>({
         type: String,
         required: true
     }]
+});
+
+UserSchema.virtual('todos', {
+    ref: 'Todo',
+    localField: '_id',
+    foreignField: 'owner'
 });
 
 UserSchema.pre<UserDocument>('save', async function (next) {

@@ -210,4 +210,26 @@ describe('User', () => {
         });
     });
 
+    describe('populate', () => {
+        it('should return user with undefined todos field when user is not populated', async () => {
+            const fixtureUsers = DbHelper.Instance.fixtureUsers[0]!;
+            expect(fixtureUsers.todos).toBeUndefined();
+        });
+
+        it('should return user with not an undefined todos field when user is populated and has no todos', async () => {
+            const fixtureUsers = DbHelper.Instance.fixtureUsers[0]!;
+            await fixtureUsers.populate('todos').execPopulate();
+            expect(fixtureUsers.todos).not.toBeUndefined();
+        });
+
+        it('should return user with array of user todos', async () => {
+            const fixtureUsers = DbHelper.Instance.fixtureUsers[0]!;
+            await DbHelper.Instance.createFixtureTodosForUser(fixtureUsers);
+            await fixtureUsers.populate('todos').execPopulate();
+            fixtureUsers.todos?.forEach((todo) => {
+                expect(todo.owner).toEqual(fixtureUsers._id);
+            });
+        });
+
+    });
 });
