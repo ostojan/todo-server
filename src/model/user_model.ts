@@ -72,6 +72,14 @@ UserSchema.pre<UserDocument>('save', async function (next) {
     next();
 });
 
+UserSchema.methods['toJSON'] = function () {
+    const userObject = this.toObject();
+    return {
+        _id: userObject._id,
+        email: userObject.email,
+    };
+};
+
 UserSchema.methods['generateAuthToken'] = async function (this: UserDocument): Promise<string> {
     const token = jwt.sign({ id: this._id.toString(), iat: Date.now() }, JWT_SECRET);
     this.tokens.push(token);

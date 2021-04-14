@@ -128,6 +128,18 @@ describe('User', () => {
         });
     });
 
+    describe('toJSON', () => {
+        it('should return object with only id and email', () => {
+            const fixtureUser = DbHelper.Instance.fixtureUsers[0]!;
+            const userObject = fixtureUser.toObject();
+            const jsonObject = fixtureUser.toJSON();
+            expect(jsonObject).toEqual({
+                _id: userObject._id,
+                email: userObject.email
+            });
+        });
+    });
+
     describe('generateAuthToken', () => {
         it('should return token containing user id', async () => {
             const fixtureUser = DbHelper.Instance.fixtureUsers[0]!;
