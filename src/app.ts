@@ -1,4 +1,5 @@
 import express, { Express } from 'express';
+import UserRouter from './routers/user_router';
 
 export default class App {
     public app: Express;
@@ -10,6 +11,8 @@ export default class App {
             res.status(200);
             res.send();
         });
+        this.app.use(express.json());
+        this.app.use(UserRouter);
         this.port = port;
     }
 
