@@ -13,7 +13,7 @@ export interface TodoDocument extends Todo, Document {
 interface TodoModel extends Model<TodoDocument> {
 };
 
-const TodoSchema = new Schema <TodoDocument, TodoModel>({
+const TodoSchema = new Schema<TodoDocument, TodoModel>({
     title: {
         type: String,
         required: true
@@ -31,5 +31,15 @@ const TodoSchema = new Schema <TodoDocument, TodoModel>({
         ref: 'User'
     }
 });
+
+TodoSchema.methods['toJSON'] = function () {
+    const todoObject = this.toObject();
+    return {
+        _id: todoObject._id.toString()!,
+        title: todoObject.title,
+        ...todoObject.date ? { date: todoObject.date.getTime() } : {},
+        completed: todoObject.completed,
+    };
+};
 
 export default model<TodoDocument, TodoModel>('Todo', TodoSchema);
