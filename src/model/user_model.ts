@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import { Document, Model, model, Schema } from 'mongoose';
 import validator from 'validator';
 
-import { TodoDocument } from './todo_model';
+import TodoModel, { TodoDocument } from './todo_model';
 
 const JWT_SECRET = process.env['JWT_SECRET']!;
 
@@ -69,6 +69,11 @@ UserSchema.pre<UserDocument>('save', async function (next) {
     if (this.isModified('password')) {
         this.password = await bcrypt.hash(this.password, 8);
     }
+    next();
+});
+
+UserSchema.pre<UserDocument>('remove', async function (next) {
+    await TodoModel.deleteMany({ owner: this._id });
     next();
 });
 

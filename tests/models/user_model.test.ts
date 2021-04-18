@@ -1,5 +1,6 @@
 
 import jwt from 'jsonwebtoken';
+import TodoModel from '../../src/model/todo_model';
 
 import UserModel, { User } from '../../src/model/user_model';
 import DbHelper from '../helpers/db_helper';
@@ -126,6 +127,16 @@ describe('User', () => {
             const user = await UserModel.create(userData);
             expect(user.password).not.toBe(userData.password);
         });
+    });
+
+    describe('remove', () => {
+        it('should remove all todo of deleted user', async () => {
+            const user = DbHelper.Instance.fixtureUsers[0]!;
+            DbHelper.Instance.createFixtureTodosForUser(user);
+            await user.remove();
+            const todos = await TodoModel.find({ owner: user._id });
+            expect(todos).toEqual([]);
+        })
     });
 
     describe('toJSON', () => {
