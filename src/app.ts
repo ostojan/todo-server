@@ -1,4 +1,6 @@
 import express, { Express } from 'express';
+
+import TodoRouter from './routers/todo_router';
 import UserRouter from './routers/user_router';
 
 export default class App {
@@ -13,6 +15,7 @@ export default class App {
         });
         this.app.use(express.json());
         this.app.use(UserRouter);
+        this.app.use(TodoRouter);
         this.port = port;
     }
 
