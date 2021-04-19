@@ -1,6 +1,7 @@
 import request from 'supertest';
 
 import App from '../../src/app';
+import TodoModel from '../../src/model/todo_model';
 import UserModel, { User, UserDocument } from '../../src/model/user_model';
 import DbHelper from '../helpers/db_helper';
 
@@ -358,6 +359,61 @@ describe('UserRouter', () => {
                 .send(userDataWithChangedPassword);
             const user = await UserModel.findByCredentials(properUser.email, userDataWithChangedPassword.password);
             expect(user).not.toBeNull();
+        });
+    });
+
+    describe('DELETE /users/me', () => {
+        const path = '/users/me';
+        let user: UserDocument;
+        let token: string;
+        let authorizationHeader: string;
+
+        beforeEach(async () => {
+            user = DbHelper.Instance.fixtureUsers[0]!;
+            token = await user.generateAuthToken();
+            authorizationHeader = `Bearer ${token}`;
+        });
+
+        it('should return 401 when user is not authenticated', async () => {
+            await request(app.app)
+                .delete(path)
+                .send()
+                .expect(401);
+        });
+
+        it('should return 200 when user is authenticated', async () => {
+            await request(app.app)
+                .delete(path)
+                .set('Authorization', authorizationHeader)
+                .send()
+                .expect(200);
+        });
+
+        it('should respond with deleted user', async () => {
+            const { body } = await request(app.app)
+                .delete(path)
+                .set('Authorization', authorizationHeader)
+                .send();
+            expect(body).toEqual(user.toJSON());
+        });
+
+        it('should delete requested user', async () => {
+            await request(app.app)
+                .delete(path)
+                .set('Authorization', authorizationHeader)
+                .send();
+            const deletedUser = await UserModel.findById(user._id);
+            expect(deletedUser).toBeNull();
+        });
+
+        it('should delete requested user todos', async () => {
+            await DbHelper.Instance.createFixtureTodosForUser(user);
+            await request(app.app)
+                .delete(path)
+                .set('Authorization', authorizationHeader)
+                .send();
+            const deletedTodos = await TodoModel.find({ owner: user._id });
+            expect(deletedTodos).toEqual([]);
         });
     });
 });

@@ -82,4 +82,14 @@ UserRouter.patch('/users/me', auth, async (req: Request, res: Response) => {
     }
 });
 
+UserRouter.delete('/users/me', auth, async (req: Request, res: Response) => {
+    try {
+        const { authData } = req.body as AuthenticatedBody;
+        await authData.user.delete();
+        res.send(authData.user);
+    } catch (e) {
+        res.status(500).send();
+    }
+});
+
 export default UserRouter;
