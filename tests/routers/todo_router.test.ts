@@ -218,7 +218,7 @@ describe('TodoRouter', () => {
         });
     });
 
-    describe('GET /todos/:todoId', () => {
+    describe('PATCH /todos/:todoId', () => {
         const path = '/todos';
         let todoDataUpdate: { title?: string, date?: Date | null, completed?: boolean };
         let todoId: string;

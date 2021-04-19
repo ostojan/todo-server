@@ -7,88 +7,102 @@ import UserModel from '../model/user_model';
 const UserRouter = Router();
 
 UserRouter.post('/users', async (req: Request, res: Response) => {
+    let result: any = null;
     try {
         const user = await UserModel.create(req.body);
         const token = await user.generateAuthToken();
-        res.send({ user, token });
+        result = {
+            user,
+            token
+        };
     } catch (e) {
-        res.status(400).send({ error: e.message });
+        result = { error: e.message };
+        res.status(400);
+    } finally {
+        res.send(result);
     }
 });
 
 UserRouter.post('/users/login', async (req: Request, res: Response) => {
+    let result: any = null
     try {
-        // TODO: This sould be handled in findByCredentials
-        //       to avoid using exceptions as control flow
         const user = await UserModel.findByCredentials(req.body['email'], req.body['password']);
         if (user === null) {
-            throw new Error();
+            res.status(400)
+        } else {
+            const token = await user!.generateAuthToken();
+            result = {
+                user,
+                token
+            };
         }
-        const token = await user!.generateAuthToken();
-        res.send({ user, token });
     } catch (e) {
-        res.status(400).send();
+        res.status(400);
+    } finally {
+        res.send(result);
     }
 });
 
 UserRouter.post('/users/logout', auth, async (req: Request, res: Response) => {
+    let result: any = null;
     try {
         const { authData } = req.body as AuthenticatedBody;
         await authData.user.removeAuthToken(authData.token);
-        res.send();
     } catch (e) {
-        res.status(500).send();
+        res.status(500);
+    } finally {
+        res.send(result);
     }
 });
 
 UserRouter.post('/users/logoutAll', auth, async (req: Request, res: Response) => {
+    let result: any = null;
     try {
         const { authData } = req.body as AuthenticatedBody;
         await authData.user.removeAllAuthTokens();
-        res.send();
     } catch (e) {
-        res.status(500).send();
+        res.status(500);
+    } finally {
+        res.send(result);
     }
 });
 
 UserRouter.get('/users/me', auth, async (req: Request, res: Response) => {
+    let result: any = null;
     try {
         const { authData } = req.body as AuthenticatedBody;
-        res.send(authData.user.toJSON());
+        result = authData.user;
     } catch (e) {
-        res.status(500).send();
+        res.status(500);
+    } finally {
+        res.send(result);
     }
 });
 
 UserRouter.patch('/users/me', auth, async (req: Request, res: Response) => {
+    let result: any = null;
     try {
         const { body, authData } = req.body as AuthenticatedBody;
-        const updates = Object.keys(body);
-        const allowedUpdates = ['email', 'password'];
-        const isValidOperation = updates.every((update: string) => allowedUpdates.includes(update));
-        if (!isValidOperation) {
-            res.status(400).send({ error: 'Invalid updates' });
-        } else {
-            const user = authData.user;
-            updates.forEach((key: string) => {
-                user.set(key, body[key]);
-            });
-            await user.save();
-            res.send(user.toJSON());
-        }
+        authData.user.set(body);
+        await authData.user.save();
+        result = authData.user;
     } catch (e) {
-        console.log(e);
-        res.status(500).send();
+        res.status(500);
+    } finally {
+        res.send(result);
     }
 });
 
 UserRouter.delete('/users/me', auth, async (req: Request, res: Response) => {
+    let result: any = null;
     try {
         const { authData } = req.body as AuthenticatedBody;
         await authData.user.delete();
-        res.send(authData.user);
+        result = authData.user;
     } catch (e) {
-        res.status(500).send();
+        res.status(500);
+    } finally {
+        res.send(result);
     }
 });
 
