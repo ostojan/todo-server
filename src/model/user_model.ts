@@ -80,7 +80,7 @@ UserSchema.pre<UserDocument>('remove', async function (next) {
 UserSchema.methods['toJSON'] = function () {
     const userObject = this.toObject();
     return {
-        _id: userObject._id,
+        _id: userObject._id!.toString(),
         email: userObject.email,
     };
 };

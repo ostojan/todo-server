@@ -145,9 +145,16 @@ describe('User', () => {
             const userObject = fixtureUser.toObject();
             const jsonObject = fixtureUser.toJSON();
             expect(jsonObject).toEqual({
-                _id: userObject._id,
+                _id: userObject._id.toString(),
                 email: userObject.email
             });
+        });
+
+        it('should return _id as string', async () => {
+            const fixtureUser = DbHelper.Instance.fixtureUsers[0]!;
+            const userObject = fixtureUser.toObject();
+            const jsonObject = fixtureUser.toJSON();
+            expect(jsonObject._id!).toBe(userObject._id!.toString());
         });
     });
 
