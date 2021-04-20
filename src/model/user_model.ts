@@ -86,7 +86,7 @@ UserSchema.methods['toJSON'] = function () {
 };
 
 UserSchema.methods['generateAuthToken'] = async function (this: UserDocument): Promise<string> {
-    const token = jwt.sign({ id: this._id.toString(), iat: Date.now() }, JWT_SECRET);
+    const token = jwt.sign({ _id: this._id.toString(), iat: Date.now() }, JWT_SECRET);
     this.tokens.push(token);
     await this.save();
     return token;
@@ -120,8 +120,8 @@ UserSchema.statics['findByCredentials'] = async function (this: UserModel,
 
 UserSchema.statics['findByToken'] = async function (this: UserModel, token: string): Promise<UserDocument | null> {
     try {
-        const decodedData = jwt.verify(token, JWT_SECRET) as { id: string };
-        const result = await this.findOne({ _id: decodedData.id, tokens: token });
+        const decodedData = jwt.verify(token, JWT_SECRET) as { _id: string };
+        const result = await this.findOne({ _id: decodedData._id, tokens: token });
         return result;
     } catch (error) {
         return null;
